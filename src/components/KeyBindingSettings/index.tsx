@@ -11,9 +11,9 @@ import {
 	rightKaKeyAtom,
 	shouldSaveConfigAtom,
 } from "$/states/main.ts";
-import { Flex, TextField, Box, Slider, Text, Select } from "@radix-ui/themes";
+import { Flex, TextField, Box, Slider, Text, Button } from "@radix-ui/themes";
 import { useAtom, useSetAtom } from "jotai";
-import { useMemo } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 const SIDE_KEY_ATOMS_MAP = {
@@ -184,18 +184,142 @@ const useKeyboardUsageText = (usage: KeyboardUsage) => {
 	}, [usage, t]);
 };
 
-const SideKeyBindingSettingItem = (props: {
-	usage: KeyboardUsage;
-}) => {
-	const usageText = useKeyboardUsageText(props.usage);
-	return <Select.Item value={`${props.usage}`}>{usageText}</Select.Item>;
+// 浏览器 KeyboardEvent.code -> KeyboardUsage 映射
+const CODE_TO_USAGE: Record<string, KeyboardUsage> = {
+	KeyA: KeyboardUsage.KeyboardAa,
+	KeyB: KeyboardUsage.KeyboardBb,
+	KeyC: KeyboardUsage.KeyboardCc,
+	KeyD: KeyboardUsage.KeyboardDd,
+	KeyE: KeyboardUsage.KeyboardEe,
+	KeyF: KeyboardUsage.KeyboardFf,
+	KeyG: KeyboardUsage.KeyboardGg,
+	KeyH: KeyboardUsage.KeyboardHh,
+	KeyI: KeyboardUsage.KeyboardIi,
+	KeyJ: KeyboardUsage.KeyboardJj,
+	KeyK: KeyboardUsage.KeyboardKk,
+	KeyL: KeyboardUsage.KeyboardLl,
+	KeyM: KeyboardUsage.KeyboardMm,
+	KeyN: KeyboardUsage.KeyboardNn,
+	KeyO: KeyboardUsage.KeyboardOo,
+	KeyP: KeyboardUsage.KeyboardPp,
+	KeyQ: KeyboardUsage.KeyboardQq,
+	KeyR: KeyboardUsage.KeyboardRr,
+	KeyS: KeyboardUsage.KeyboardSs,
+	KeyT: KeyboardUsage.KeyboardTt,
+	KeyU: KeyboardUsage.KeyboardUu,
+	KeyV: KeyboardUsage.KeyboardVv,
+	KeyW: KeyboardUsage.KeyboardWw,
+	KeyX: KeyboardUsage.KeyboardXx,
+	KeyY: KeyboardUsage.KeyboardYy,
+	KeyZ: KeyboardUsage.KeyboardZz,
+	Digit1: KeyboardUsage.Keyboard1Exclamation,
+	Digit2: KeyboardUsage.Keyboard2At,
+	Digit3: KeyboardUsage.Keyboard3Hash,
+	Digit4: KeyboardUsage.Keyboard4Dollar,
+	Digit5: KeyboardUsage.Keyboard5Percent,
+	Digit6: KeyboardUsage.Keyboard6Caret,
+	Digit7: KeyboardUsage.Keyboard7Ampersand,
+	Digit8: KeyboardUsage.Keyboard8Asterisk,
+	Digit9: KeyboardUsage.Keyboard9OpenParens,
+	Digit0: KeyboardUsage.Keyboard0CloseParens,
+	Enter: KeyboardUsage.KeyboardEnter,
+	Escape: KeyboardUsage.KeyboardEscape,
+	Backspace: KeyboardUsage.KeyboardBackspace,
+	Tab: KeyboardUsage.KeyboardTab,
+	Space: KeyboardUsage.KeyboardSpacebar,
+	Minus: KeyboardUsage.KeyboardDashUnderscore,
+	Equal: KeyboardUsage.KeyboardEqualPlus,
+	BracketLeft: KeyboardUsage.KeyboardOpenBracketBrace,
+	BracketRight: KeyboardUsage.KeyboardCloseBracketBrace,
+	Backslash: KeyboardUsage.KeyboardBackslashBar,
+	IntlBackslash: KeyboardUsage.KeyboardNonUSHash,
+	Semicolon: KeyboardUsage.KeyboardSemiColon,
+	Quote: KeyboardUsage.KeyboardSingleDoubleQuote,
+	Backquote: KeyboardUsage.KeyboardBacktickTilde,
+	Comma: KeyboardUsage.KeyboardCommaLess,
+	Period: KeyboardUsage.KeyboardPeriodGreater,
+	Slash: KeyboardUsage.KeyboardSlashQuestion,
+	CapsLock: KeyboardUsage.KeyboardCapsLock,
+	F1: KeyboardUsage.KeyboardF1,
+	F2: KeyboardUsage.KeyboardF2,
+	F3: KeyboardUsage.KeyboardF3,
+	F4: KeyboardUsage.KeyboardF4,
+	F5: KeyboardUsage.KeyboardF5,
+	F6: KeyboardUsage.KeyboardF6,
+	F7: KeyboardUsage.KeyboardF7,
+	F8: KeyboardUsage.KeyboardF8,
+	F9: KeyboardUsage.KeyboardF9,
+	F10: KeyboardUsage.KeyboardF10,
+	F11: KeyboardUsage.KeyboardF11,
+	F12: KeyboardUsage.KeyboardF12,
+	ArrowRight: KeyboardUsage.KeyboardRightArrow,
+	ArrowLeft: KeyboardUsage.KeyboardLeftArrow,
+	ArrowDown: KeyboardUsage.KeyboardDownArrow,
+	ArrowUp: KeyboardUsage.KeyboardUpArrow,
 };
 
-const KEYBOARD_USAGES = Object.values(KeyboardUsage).filter(
-	(v) => typeof v === "string",
-) as (keyof KeyboardUsage)[];
+const KeyCaptureButton = ({
+	value,
+	onChange,
+}: {
+	value: KeyboardUsage;
+	onChange: (v: KeyboardUsage) => void;
+}) => {
+	const { t } = useTranslation();
+	const text = useKeyboardUsageText(value);
+	const [listening, setListening] = useState(false);
 
-KEYBOARD_USAGES.sort((a, b) => KeyboardUsage[a] - KeyboardUsage[b]);
+	const stopListening = useCallback(() => setListening(false), []);
+
+	useEffect(() => {
+		if (!listening) return;
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// 避免页面快捷键触发
+			e.preventDefault();
+			if (e.code === "Escape") {
+				stopListening();
+				return;
+			}
+			const usage = CODE_TO_USAGE[e.code];
+			if (usage !== undefined) {
+				onChange(usage);
+				stopListening();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown, { capture: true });
+		return () =>
+			window.removeEventListener(
+				"keydown",
+				handleKeyDown,
+				// capture 需要与 addEventListener 保持一致
+				{ capture: true } as EventListenerOptions,
+			);
+	}, [listening, onChange, stopListening]);
+
+	return (
+		<Button
+			variant={listening ? "solid" : "outline"}
+			color={listening ? "indigo" : undefined}
+			onClick={() => setListening((v) => !v)}
+			style={{ width: "10em" }}
+			title={
+				listening
+					? t(
+							"page.config.keyBindingSettings.capture.listeningTooltip",
+							"按任意键以设置，Esc 取消",
+						)
+					: t(
+							"page.config.keyBindingSettings.capture.clickToChange",
+							"点击后按任意键更改",
+						)
+			}
+		>
+			{listening
+				? t("page.config.keyBindingSettings.capture.listening", "等待输入...")
+				: text}
+		</Button>
+	);
+};
 
 export const SideKeyBindingSettings = (props: {
 	side: keyof typeof SIDE_KEY_ATOMS_MAP;
@@ -240,27 +364,13 @@ export const SideKeyBindingSettings = (props: {
 					</Trans>
 				</Text>
 			</Flex>
-			<Select.Root
-				value={`${keyBinding}`}
-				onValueChange={(v) => {
-					setKeyBinding(Number.parseInt(v) as KeyboardUsage);
+			<KeyCaptureButton
+				value={keyBinding}
+				onChange={(v) => {
+					setKeyBinding(v);
 					setShouldSaveConfig(true);
 				}}
-			>
-				<Select.Trigger
-					style={{
-						width: "10em",
-					}}
-				/>
-				<Select.Content>
-					{KEYBOARD_USAGES.map((usage) => (
-						<SideKeyBindingSettingItem
-							key={usage}
-							usage={KeyboardUsage[usage as any] as unknown as KeyboardUsage}
-						/>
-					))}
-				</Select.Content>
-			</Select.Root>
+			/>
 		</Flex>
 	);
 };

@@ -91,7 +91,7 @@ export async function getConnectedHidDevice(): Promise<HidDevice | null> {
 		return await invoke<HidDevice | null>("get_connected_hid");
 	const devices = await navigator.hid.getDevices();
 	const deviceIndex = devices.findIndex((device) => device.opened);
-	return webHidConnectedDevice
+	return webHidConnectedDevice?.opened
 		? {
 				manufacturer: "",
 				product: webHidConnectedDevice.productName,
