@@ -136,7 +136,7 @@ export const TaikoCatzV4Settings = () => {
 					<br />
 					{t(
 						"page.config.taikocatzv4.thirdPartyWarning.detail2",
-						"电控保存设置的一秒后会自动重启，届时会断开连接，",
+						"保存设置会播放5秒钟音乐然后自动重启，届时会断开连接，",
 					)}
 					<br />
 					{t(

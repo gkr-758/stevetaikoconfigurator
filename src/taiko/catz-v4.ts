@@ -90,7 +90,7 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 				}
 			}
 		}
-		return crc ^ 0xffffffff;
+		return (crc ^ 0xffffffff) >>> 0;
 	}
 
 	constructor(hidDevice: HidDevice) {
