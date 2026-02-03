@@ -124,24 +124,21 @@ export const TaikoCatzV4Settings = () => {
 					<InfoCircledIcon />
 				</Callout.Icon>
 				<Callout.Text>
+					<b>
 					{t(
-						"page.config.taikocatzv4.thirdPartyWarning.title",
-						"猫鼓电控配置功能为第三方适配，可能与官方配置工具存在差异。",
+						"page.config.taikocatzv4.bannerHint.title",
+						"谨慎使用：尚在开发测试阶段",
+					)}
+					</b>
+					<br />
+					{t(
+						"page.config.taikocatzv4.bannerHint.detail1",
+						"目前未必保证功能完善稳定，请以官方配置工具为准。",
 					)}
 					<br />
 					{t(
-						"page.config.taikocatzv4.thirdPartyWarning.detail1",
-						"如果出现配置问题/差异，请以设备官方固件和官方配置工具为准。",
-					)}
-					<br />
-					{t(
-						"page.config.taikocatzv4.thirdPartyWarning.detail2",
-						"保存设置会播放5秒钟音乐然后自动重启，届时会断开连接，",
-					)}
-					<br />
-					{t(
-						"page.config.taikocatzv4.thirdPartyWarning.detail3",
-						"如果要重新配置可能需要重新连接设备。",
+						"page.config.taikocatzv4.bannerHint.detail2",
+						"保存时，电控直出音频会播放5秒钟音乐，然后自动重启。再次配置需要重新连接设备。",
 					)}
 				</Callout.Text>
 			</Callout.Root>

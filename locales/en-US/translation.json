@@ -62,11 +62,10 @@
       },
       "taikocatzv4": {
         "loading": "Loading configuration...",
-        "thirdPartyWarning": {
-          "title": "TaikoCatz configuration is a third-party adaptation and may differ from official tools.",
-          "detail1": "If there are configuration issues/differences, please refer to the official firmware and tools.",
-          "detail2": "The controller will automatically restart one second after saving, which will disconnect it.",
-          "detail3": "You may need to reconnect to configure again."
+        "bannerHint": {
+          "title": "Caution: Under Development and Testing",
+          "detail1": "Functionality may be incomplete or unstable, please refer to official configuration tools.",
+          "detail2": "Upon saving, the dongle will play 5 seconds of music and then automatically restart. Reconfiguration will require reconnecting the device."
         },
         "sensitivity": {
           "label": "Sensitivity",
