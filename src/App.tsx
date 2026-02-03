@@ -22,18 +22,14 @@ import { LanguageSelector } from "./components/LanguageSelector/index.tsx";
 import { useTranslation } from "react-i18next";
 import "$/utils/audio.ts";
 
-window.invoke = invoke;
-window.hidApi = HidApi;
+(window as any).invoke = invoke;
+(window as any).hidApi = HidApi;
 
-const hasBackgroundAtom = atom(
-	import.meta.env.TAURI_ENV_PLATFORM
-		? () => semverLt(version(), "10.0.22000")
-		: () => true,
-);
+const hasBackgroundAtom = atom(true);
 
 function App() {
 	const theme = useAtomValue(isDarkThemeAtom);
-	const hasBackground = useAtomValue(hasBackgroundAtom);
+	const [hasBackground, setHasBackground] = useAtom(hasBackgroundAtom);
 	const [page, setPage] = useAtom(pageAtom);
 	const { t } = useTranslation();
 
@@ -43,11 +39,14 @@ function App() {
 			try {
 				const win = getCurrentWindow();
 
-				console.log(version());
+				version().then((v) => {
+					console.log(v);
+					setHasBackground(semverLt(v, "10.0.22000"));
+				});
 
 				win.show();
 			} catch {}
-		}, []);
+		}, [setHasBackground]);
 	}
 
 	return (

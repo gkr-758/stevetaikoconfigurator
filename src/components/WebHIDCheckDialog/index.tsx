@@ -1,9 +1,9 @@
 import { atom, useAtomValue } from "jotai";
-import { isHIDSupported } from "$/utils/hid.ts";
+import { HidDevice } from "$/utils/hid.ts";
 import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
 import { Trans } from "react-i18next";
 
-const isHIDSupportedAtom = atom(() => isHIDSupported());
+const isHIDSupportedAtom = atom(() => HidDevice.isSupported());
 
 export const WebHIDCheckDialog = () => {
 	const isHIDSupported = useAtomValue(isHIDSupportedAtom);

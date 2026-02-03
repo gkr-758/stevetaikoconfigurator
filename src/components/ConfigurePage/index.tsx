@@ -4,17 +4,52 @@ import { SensorSettings } from "../SensorSettings/index.tsx";
 import { SingleLabeledSensorVisualizer } from "../SensorVisualizer/index.tsx";
 import { TaikoVisualizerForKeyboard } from "../TaikoVisualizer/keyboard.tsx";
 import { atom, useAtomValue } from "jotai";
-import { isHIDSupported } from "$/utils/hid.ts";
-import { connectedHidDevicesAtom } from "$/states/main.ts";
+import { HidDevice } from "$/utils/hid.ts";
+import {
+	activeConfiguratorAtom,
+	connectedHidDevicesAtom,
+} from "$/states/main.ts";
 import { Trans } from "react-i18next";
+import { FeatureSupport } from "$/taiko/base.ts";
+import { useMemo } from "react";
+import { TaikoCatzV4Settings } from "../TaikoCatzV4Settings/index.tsx";
 
-const isHIDSupportedAtom = atom(() => isHIDSupported());
-
+const isHIDSupportedAtom = atom(() => HidDevice.isSupported());
 export const ConfigurePage = () => {
 	const isHidSupported = useAtomValue(isHIDSupportedAtom);
 	const hidDevice = useAtomValue(connectedHidDevicesAtom);
+	const configurator = useAtomValue(activeConfiguratorAtom);
 
 	const isEnabled = !!(isHidSupported && hidDevice);
+
+	const supportedFeatures = useMemo(
+		() => configurator?.supportedFeatures() ?? new Set(),
+		[configurator],
+	);
+
+	const isSensorTabSupported = useMemo(() => {
+		return (
+			supportedFeatures.has(FeatureSupport.SetSensorTriggerThrehold) ||
+			supportedFeatures.has(FeatureSupport.SetLEDHitIndicator) ||
+			supportedFeatures.has(FeatureSupport.SetBothSideHitJudge) ||
+			supportedFeatures.has(FeatureSupport.SetSensorSubtrahendPerSide)
+		);
+	}, [supportedFeatures]);
+
+	const isKeyBindingTabSupported = useMemo(() => {
+		return (
+			supportedFeatures.has(FeatureSupport.SetSensorKeyDuration) ||
+			supportedFeatures.has(FeatureSupport.SetSensorKeyPerSide) ||
+			supportedFeatures.has(FeatureSupport.SetCustomKey1) ||
+			supportedFeatures.has(FeatureSupport.SetCustomKey2) ||
+			supportedFeatures.has(FeatureSupport.SetCustomKey3) ||
+			supportedFeatures.has(FeatureSupport.SetCustomKey4)
+		);
+	}, [supportedFeatures]);
+
+	const isVisualizerSupported = supportedFeatures.has(
+		FeatureSupport.SensorVisualization,
+	);
 
 	return (
 		<Flex
@@ -51,8 +86,12 @@ export const ConfigurePage = () => {
 				height="fit-content"
 			>
 				<Flex gap="4" height="15em">
-					<SingleLabeledSensorVisualizer side="leftKa" />
-					<SingleLabeledSensorVisualizer side="leftDon" />
+					{isVisualizerSupported && (
+						<SingleLabeledSensorVisualizer side="leftKa" />
+					)}
+					{isVisualizerSupported && (
+						<SingleLabeledSensorVisualizer side="leftDon" />
+					)}
 				</Flex>
 				<TaikoVisualizerForKeyboard
 					size={256}
@@ -61,32 +100,50 @@ export const ConfigurePage = () => {
 					outlineColor="var(--gray-10)"
 				/>
 				<Flex gap="4" height="15em">
-					<SingleLabeledSensorVisualizer side="rightDon" />
-					<SingleLabeledSensorVisualizer side="rightKa" />
+					{isVisualizerSupported && (
+						<SingleLabeledSensorVisualizer side="rightDon" />
+					)}
+					{isVisualizerSupported && (
+						<SingleLabeledSensorVisualizer side="rightKa" />
+					)}
 				</Flex>
 			</Flex>
 
-			<Tabs.Root
-				defaultValue="sensor"
-				style={{
-					width: "30em",
-				}}
-			>
-				<Tabs.List>
-					<Tabs.Trigger value="sensor">
-						<Trans i18nKey="page.config.tabs.sensor">传感设置</Trans>
-					</Tabs.Trigger>
-					<Tabs.Trigger value="keybinding">
-						<Trans i18nKey="page.config.tabs.keyBinding">按键设置</Trans>
-					</Tabs.Trigger>
-				</Tabs.List>
-				<Tabs.Content value="sensor">
-					<SensorSettings />
-				</Tabs.Content>
-				<Tabs.Content value="keybinding">
-					<KeyBindingSettings />
-				</Tabs.Content>
-			</Tabs.Root>
+			{supportedFeatures?.has(FeatureSupport.TaikoCatzV4ProSupport) && (
+				<TaikoCatzV4Settings />
+			)}
+
+			{(isSensorTabSupported || isKeyBindingTabSupported) && (
+				<Tabs.Root
+					defaultValue={isSensorTabSupported ? "sensor" : "keybinding"}
+					style={{
+						width: "30em",
+					}}
+				>
+					<Tabs.List>
+						{isSensorTabSupported && (
+							<Tabs.Trigger value="sensor">
+								<Trans i18nKey="page.config.tabs.sensor">传感设置</Trans>
+							</Tabs.Trigger>
+						)}
+						{isKeyBindingTabSupported && (
+							<Tabs.Trigger value="keybinding">
+								<Trans i18nKey="page.config.tabs.keyBinding">按键设置</Trans>
+							</Tabs.Trigger>
+						)}
+					</Tabs.List>
+					{isSensorTabSupported && (
+						<Tabs.Content value="sensor">
+							<SensorSettings />
+						</Tabs.Content>
+					)}
+					{isKeyBindingTabSupported && (
+						<Tabs.Content value="keybinding">
+							<KeyBindingSettings />
+						</Tabs.Content>
+					)}
+				</Tabs.Root>
+			)}
 		</Flex>
 	);
 };

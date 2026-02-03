@@ -59,6 +59,61 @@
           "label": "Enable double hit detection (Experimental)",
           "description": "Whether treat both side hit as a double hit, and press both side of the buttons."
         }
+      },
+      "taikocatzv4": {
+        "loading": "Loading configuration...",
+        "thirdPartyWarning": {
+          "title": "TaikoCatz configuration is a third-party adaptation and may differ from official tools.",
+          "detail1": "If there are configuration issues/differences, please refer to the official firmware and tools.",
+          "detail2": "The controller will automatically restart one second after saving, which will disconnect it.",
+          "detail3": "You may need to reconnect to configure again."
+        },
+        "sensitivity": {
+          "label": "Sensitivity",
+          "tooltip": "Adjust sensitivity of each hit area and overall sensitivity multiplier.<1></1>If there is too much crosstalk, try reducing the sensitivity of the corresponding area.",
+          "sides": {
+            "leftKa": "Left Ka",
+            "leftDon": "Left Don",
+            "rightDon": "Right Don",
+            "rightKa": "Right Ka"
+          },
+          "overall": {
+            "label": "Overall Sensitivity",
+            "options": {
+              "low": "Low (0.7x)",
+              "medium": "Medium (1.0x)",
+              "high": "High (1.4x)",
+              "veryHigh": "Very High (2.0x)",
+              "extreme": "Extreme (2.8x)"
+            }
+          }
+        },
+        "performance": {
+          "label": "Performance",
+          "tooltip": "This affects hit recognition stability and drumroll performance.<1></1>Longer key press duration causes latency. Shorter duration might cause the game to miss inputs.<3></3>If unsure or playing official games, use Balanced for most cases.<5></5>If using emulators or games <7>based on key events (or buffered input)</7>, set to minimum duration for lowest latency and best drumroll experience.",
+          "drumrollLevel": {
+            "label": "Drumroll Level",
+            "options": {
+              "fallback": "Fallback (Reliability++, Drumroll--, 16ms)",
+              "level1": "Level 1 (Reliability+, Drumroll-, 16ms)",
+              "level2": "Level 2 (Balanced, 10ms)",
+              "level3": "Level 3 (Reliability-, Drumroll+, 8ms)",
+              "level4": "Level 4 (Reliability--, Drumroll++, 6ms)"
+            }
+          },
+          "usePresetDrumroll": "Use default duration by drum-roll level",
+          "keyPressDuration": "Key Press Duration"
+        },
+        "others": {
+          "label": "Others",
+          "keyboardMapping": {
+            "label": "Keyboard Mapping Scheme",
+            "options": {
+              "dfjk": "Use DF-JK scheme",
+              "zxcv": "Use ZX-CV scheme"
+            }
+          }
+        }
       }
     },
     "test": {
@@ -184,6 +239,7 @@
   "dialogs": {
     "taikoControllerSelector": {
       "item": {
+        "dongleType": "Dongle Type：{dongleType}",
         "serialNumber": "Serial Number: {serialNumber}",
         "connected": "Connected"
       },

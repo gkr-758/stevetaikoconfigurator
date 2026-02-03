@@ -5,6 +5,7 @@ import {
 	customButton3KeyAtom,
 	customButton4KeyAtom,
 	doubleSideHitDetectionAtom,
+	activeConfiguratorAtom,
 	hidDevicesAtom,
 	keyInvokeDurationAtom,
 	ledHitIndicatorAtom,
@@ -20,14 +21,7 @@ import {
 	type KeyboardUsage,
 } from "$/states/main.ts";
 import { eqSet } from "$/utils/eq-set.ts";
-import {
-	type HidDevice,
-	getAllHidDevices,
-	getConnectedHidDevice,
-	isHIDSupported,
-	recvFeatureReportFromHid,
-	reopenHidDevice,
-} from "$/utils/hid.ts";
+import { type HidDeviceDesc, HidDevice } from "$/utils/hid.ts";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import {
 	Button,
@@ -47,12 +41,13 @@ const taikoControllerSelectorOpenedAtom = atom(false);
 const isOpeningAtom = atom(false);
 
 const TaikoControllerSelectorItem = (props: {
-	hidDevice: HidDevice;
+	hidDevice: HidDeviceDesc;
 	onSelected?: () => void;
 }) => {
 	const { t } = useTranslation();
 	const setOpened = useSetAtom(taikoControllerSelectorOpenedAtom);
 	const setConnectedDevice = useSetAtom(connectedHidDevicesAtom);
+	const setActiveConfigurator = useSetAtom(activeConfiguratorAtom);
 	const [opening, setOpening] = useState(false);
 	const connectedDevice = useAtomValue(connectedHidDevicesAtom);
 
@@ -66,8 +61,9 @@ const TaikoControllerSelectorItem = (props: {
 				setConnectedDevice(null);
 				setOpening(true);
 				try {
-					await reopenHidDevice(props.hidDevice.path);
+					const device = await HidDevice.reopenHidDevice(props.hidDevice.path);
 					setConnectedDevice(props.hidDevice);
+					setActiveConfigurator(new props.hidDevice.taikoClass(device));
 					setOpened(false);
 					props.onSelected?.();
 				} catch (e) {
@@ -79,6 +75,15 @@ const TaikoControllerSelectorItem = (props: {
 		>
 			<Flex direction="column" flexGrow="1">
 				<Text>{props.hidDevice.product}</Text>
+				<Text size="1" color="gray">
+					{t(
+						"dialogs.taikoControllerSelector.item.dongleType",
+						"电控型号：{dongleType}",
+						{
+							dongleType: props.hidDevice.taikoClass.taikoDongleName,
+						},
+					)}
+				</Text>
 				<Text size="1" color="gray">
 					{t(
 						"dialogs.taikoControllerSelector.item.serialNumber",
@@ -101,7 +106,7 @@ const TaikoControllerSelectorItem = (props: {
 	);
 };
 
-const isHIDSupportedAtom = atom(() => isHIDSupported());
+const isHIDSupportedAtom = atom(() => HidDevice.isSupported());
 
 export const TaikoControllerSelector = () => {
 	const store = useStore();
@@ -113,93 +118,62 @@ export const TaikoControllerSelector = () => {
 	const { t } = useTranslation();
 
 	const reloadConfigurations = useCallback(async () => {
-		const commonConfigReport = await recvFeatureReportFromHid(0x11);
-		if (!commonConfigReport) return;
-		const pcConfigReport = await recvFeatureReportFromHid(0x12);
-		if (!pcConfigReport) return;
-		// const nsConfigReport = await recvFeatureReportFromHid(0x13); // TODO
-		// if (!nsConfigReport) return;
+		const activeConfigurator = store.get(activeConfiguratorAtom);
+		if (activeConfigurator) {
+			const settings = await activeConfigurator.loadSettings();
 
-		console.log("reloading hid configuration", {
-			commonConfigReport,
-			pcConfigReport,
-		});
+			if (settings.ledHitIndicator !== undefined)
+				store.set(ledHitIndicatorAtom, settings.ledHitIndicator);
+			if (settings.doubleSideHitDetection !== undefined)
+				store.set(doubleSideHitDetectionAtom, settings.doubleSideHitDetection);
+			if (settings.keyInvokeDuration !== undefined)
+				store.set(keyInvokeDurationAtom, settings.keyInvokeDuration);
+			if (settings.triggerThreshold !== undefined)
+				store.set(triggerThresholdAtom, settings.triggerThreshold);
 
-		// const emulationMode = commonConfigReport.getUint8(1);
-		const boolFlags = commonConfigReport.getUint8(2);
-		store.set(ledHitIndicatorAtom, !!(boolFlags & 0b01));
-		store.set(doubleSideHitDetectionAtom, !!(boolFlags & 0b10));
-		store.set(keyInvokeDurationAtom, commonConfigReport.getUint16(3, true));
-		store.set(triggerThresholdAtom, commonConfigReport.getUint16(5, true));
-
-		store.set(
-			leftKaSensorSubtrahendAtom,
-			commonConfigReport.getUint16(7, true),
-		);
-		store.set(
-			leftDonSensorSubtrahendAtom,
-			commonConfigReport.getUint16(9, true),
-		);
-		store.set(
-			rightDonSensorSubtrahendAtom,
-			commonConfigReport.getUint16(11, true),
-		);
-		store.set(
-			rightKaSensorSubtrahendAtom,
-			commonConfigReport.getUint16(13, true),
-		);
-
-		store.set(leftKaKeyAtom, pcConfigReport.getUint8(1) as KeyboardUsage);
-		store.set(leftDonKeyAtom, pcConfigReport.getUint8(2) as KeyboardUsage);
-		store.set(rightDonKeyAtom, pcConfigReport.getUint8(3) as KeyboardUsage);
-		store.set(rightKaKeyAtom, pcConfigReport.getUint8(4) as KeyboardUsage);
-		store.set(
-			customButton1KeyAtom,
-			pcConfigReport.getUint8(5) as KeyboardUsage,
-		);
-		store.set(
-			customButton2KeyAtom,
-			pcConfigReport.getUint8(6) as KeyboardUsage,
-		);
-		store.set(
-			customButton3KeyAtom,
-			pcConfigReport.getUint8(7) as KeyboardUsage,
-		);
-		store.set(
-			customButton4KeyAtom,
-			pcConfigReport.getUint8(8) as KeyboardUsage,
-		);
-	}, [store]);
-
-	if (import.meta.env.TAURI_ENV_PLATFORM) {
-		useEffect(() => {
-			const interval = setInterval(async () => {
-				const devices = await getAllHidDevices();
-				const curDevicesPaths = new Set(
-					store.get(hidDevicesAtom).map((v) => v.path),
+			if (settings.sensorSubtrahends) {
+				store.set(
+					leftKaSensorSubtrahendAtom,
+					settings.sensorSubtrahends.leftKa,
 				);
-				const newDevicesPaths = new Set(devices.map((v) => v.path));
-				if (!eqSet(curDevicesPaths, newDevicesPaths)) {
-					store.set(hidDevicesAtom, devices);
-				}
-			}, 1000);
-
-			getConnectedHidDevice().then((device) => {
-				store.set(connectedHidDevicesAtom, device);
-				reloadConfigurations();
-			});
-
-			return () => clearInterval(interval);
-		}, [store, reloadConfigurations]);
-	} else {
-		useEffect(() => {
-			if (opened) {
-				getAllHidDevices().then((devices) =>
-					store.set(hidDevicesAtom, devices),
+				store.set(
+					leftDonSensorSubtrahendAtom,
+					settings.sensorSubtrahends.leftDon,
+				);
+				store.set(
+					rightDonSensorSubtrahendAtom,
+					settings.sensorSubtrahends.rightDon,
+				);
+				store.set(
+					rightKaSensorSubtrahendAtom,
+					settings.sensorSubtrahends.rightKa,
 				);
 			}
-		}, [opened, store]);
-	}
+
+			if (settings.keyBindings) {
+				store.set(leftKaKeyAtom, settings.keyBindings.leftKa);
+				store.set(leftDonKeyAtom, settings.keyBindings.leftDon);
+				store.set(rightDonKeyAtom, settings.keyBindings.rightDon);
+				store.set(rightKaKeyAtom, settings.keyBindings.rightKa);
+				if (settings.keyBindings.custom1 !== undefined)
+					store.set(customButton1KeyAtom, settings.keyBindings.custom1);
+				if (settings.keyBindings.custom2 !== undefined)
+					store.set(customButton2KeyAtom, settings.keyBindings.custom2);
+				if (settings.keyBindings.custom3 !== undefined)
+					store.set(customButton3KeyAtom, settings.keyBindings.custom3);
+				if (settings.keyBindings.custom4 !== undefined)
+					store.set(customButton4KeyAtom, settings.keyBindings.custom4);
+			}
+		}
+	}, [store]);
+
+	useEffect(() => {
+		if (opened) {
+			HidDevice.getAllHidDevices().then((devices) =>
+				store.set(hidDevicesAtom, devices),
+			);
+		}
+	}, [opened, store]);
 
 	return (
 		<>
@@ -227,7 +201,7 @@ export const TaikoControllerSelector = () => {
 							检测到的太鼓控制器
 						</Trans>
 					</Dialog.Title>
-					<RadioCards.Root>
+					<RadioCards.Root orientation="vertical">
 						{hidDevices.map((d) => (
 							<TaikoControllerSelectorItem
 								key={d.path}

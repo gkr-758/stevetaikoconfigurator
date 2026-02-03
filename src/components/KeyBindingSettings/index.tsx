@@ -1,4 +1,5 @@
 import {
+	activeConfiguratorAtom,
 	customButton1KeyAtom,
 	customButton2KeyAtom,
 	customButton3KeyAtom,
@@ -11,8 +12,9 @@ import {
 	rightKaKeyAtom,
 	shouldSaveConfigAtom,
 } from "$/states/main.ts";
+import { FeatureSupport } from "$/taiko/base.ts";
 import { Flex, TextField, Box, Slider, Text, Button } from "@radix-ui/themes";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useSetAtom, useAtomValue } from "jotai";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -440,19 +442,35 @@ const KeyInvokeDurationSetting = () => {
 };
 
 export const KeyBindingSettings = () => {
+	const configurator = useAtomValue(activeConfiguratorAtom);
+	const supportedFeatures = configurator?.supportedFeatures();
 	return (
 		<Flex direction="column" gap="4" my="6">
-			<KeyInvokeDurationSetting />
+			{supportedFeatures?.has(FeatureSupport.SetSensorKeyDuration) && (
+				<KeyInvokeDurationSetting />
+			)}
 
-			<SideKeyBindingSettings side="leftKa" />
-			<SideKeyBindingSettings side="leftDon" />
-			<SideKeyBindingSettings side="rightDon" />
-			<SideKeyBindingSettings side="rightKa" />
+			{supportedFeatures?.has(FeatureSupport.SetSensorKeyPerSide) && (
+				<>
+					<SideKeyBindingSettings side="leftKa" />
+					<SideKeyBindingSettings side="leftDon" />
+					<SideKeyBindingSettings side="rightDon" />
+					<SideKeyBindingSettings side="rightKa" />
+				</>
+			)}
 
-			<SideKeyBindingSettings side="customButton1" />
-			<SideKeyBindingSettings side="customButton2" />
-			<SideKeyBindingSettings side="customButton3" />
-			<SideKeyBindingSettings side="customButton4" />
+			{supportedFeatures?.has(FeatureSupport.SetCustomKey1) && (
+				<SideKeyBindingSettings side="customButton1" />
+			)}
+			{supportedFeatures?.has(FeatureSupport.SetCustomKey2) && (
+				<SideKeyBindingSettings side="customButton2" />
+			)}
+			{supportedFeatures?.has(FeatureSupport.SetCustomKey3) && (
+				<SideKeyBindingSettings side="customButton3" />
+			)}
+			{supportedFeatures?.has(FeatureSupport.SetCustomKey4) && (
+				<SideKeyBindingSettings side="customButton4" />
+			)}
 		</Flex>
 	);
 };

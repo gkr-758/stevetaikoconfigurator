@@ -1,5 +1,5 @@
 {
-  "name": "tauri-desktop-app-template",
+  "name": "stevetaikoconfigurator",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "fmt": "biome format --write ./src",
     "preview": "vite preview",
-    "locale:gen": "i18next --fail-on-warnings 'src/**/*.{ts,tsx}'"
+    "locale:gen": "i18next --fail-on-warnings 'src/**/*.{ts,tsx}'",
+    "tauri": "tauri"
   },
   "dependencies": {
     "@radix-ui/react-icons": "^1.3.2",

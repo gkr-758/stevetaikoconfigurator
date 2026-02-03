@@ -1,4 +1,5 @@
 import {
+	activeConfiguratorAtom,
 	connectedHidDevicesAtom,
 	customButton1KeyAtom,
 	customButton2KeyAtom,
@@ -8,9 +9,9 @@ import {
 	keyInvokeDurationAtom,
 	ledHitIndicatorAtom,
 	leftDonKeyAtom,
-	leftKaSensorSubtrahendAtom,
-	leftKaKeyAtom,
 	leftDonSensorSubtrahendAtom,
+	leftKaKeyAtom,
+	leftKaSensorSubtrahendAtom,
 	rightDonKeyAtom,
 	rightDonSensorSubtrahendAtom,
 	rightKaKeyAtom,
@@ -18,7 +19,7 @@ import {
 	shouldSaveConfigAtom,
 	triggerThresholdAtom,
 } from "$/states/main.ts";
-import { sendFeatureReportToHid } from "$/utils/hid.ts";
+import { DrumSide, FeatureSupport } from "$/taiko/base.ts";
 import { Button } from "@radix-ui/themes";
 import { atom, useAtomValue, useStore } from "jotai";
 import { useCallback } from "react";
@@ -33,54 +34,90 @@ export const SaveConfigButton = () => {
 	const store = useStore();
 
 	const saveConfig = useCallback(async () => {
+		const activeConfigurator = store.get(activeConfiguratorAtom);
+		if (!activeConfigurator) return;
 		store.set(savingConfigAtom, true);
 		try {
-			const commonConfigReport = new DataView(new ArrayBuffer(15));
-			commonConfigReport.setUint8(0, 0x11);
-			commonConfigReport.setUint8(1, 0x00);
-			let boolFlags = 0;
-			boolFlags |= store.get(ledHitIndicatorAtom) ? 0b01 : 0;
-			boolFlags |= store.get(doubleSideHitDetectionAtom) ? 0b10 : 0;
-			commonConfigReport.setUint8(2, boolFlags);
-			commonConfigReport.setUint16(3, store.get(keyInvokeDurationAtom), true);
-			commonConfigReport.setUint16(5, store.get(triggerThresholdAtom), true);
-			commonConfigReport.setUint16(
-				7,
-				store.get(leftKaSensorSubtrahendAtom),
-				true,
-			);
-			commonConfigReport.setUint16(
-				9,
-				store.get(leftDonSensorSubtrahendAtom),
-				true,
-			);
-			commonConfigReport.setUint16(
-				11,
-				store.get(rightDonSensorSubtrahendAtom),
-				true,
-			);
-			commonConfigReport.setUint16(
-				13,
-				store.get(rightKaSensorSubtrahendAtom),
-				true,
-			);
+			const supported = (activeConfigurator.constructor as any)
+				.supportedFeatures as Set<FeatureSupport>;
 
-			const pcConfigReport = new DataView(new ArrayBuffer(9));
-			pcConfigReport.setUint8(0, 0x12);
-			pcConfigReport.setUint8(1, store.get(leftKaKeyAtom));
-			pcConfigReport.setUint8(2, store.get(leftDonKeyAtom));
-			pcConfigReport.setUint8(3, store.get(rightDonKeyAtom));
-			pcConfigReport.setUint8(4, store.get(rightKaKeyAtom));
-			pcConfigReport.setUint8(5, store.get(customButton1KeyAtom));
-			pcConfigReport.setUint8(6, store.get(customButton2KeyAtom));
-			pcConfigReport.setUint8(7, store.get(customButton3KeyAtom));
-			pcConfigReport.setUint8(8, store.get(customButton4KeyAtom));
-			console.log("saving hid configuration", {
-				commonConfigReport,
-				pcConfigReport,
-			});
-			await sendFeatureReportToHid(commonConfigReport);
-			await sendFeatureReportToHid(pcConfigReport);
+			if (supported.has(FeatureSupport.SetSensorTriggerThrehold))
+				await activeConfigurator.setTriggerThreshold(
+					store.get(triggerThresholdAtom),
+				);
+			if (supported.has(FeatureSupport.SetBothSideHitJudge))
+				await activeConfigurator.setBothSideHitJudge(
+					store.get(doubleSideHitDetectionAtom),
+				);
+			if (supported.has(FeatureSupport.SetLEDHitIndicator))
+				await activeConfigurator.setLedHitIndicator(
+					store.get(ledHitIndicatorAtom),
+				);
+			if (supported.has(FeatureSupport.SetSensorKeyDuration))
+				await activeConfigurator.setKeyInvokeDuration(
+					store.get(keyInvokeDurationAtom),
+				);
+
+			if (supported.has(FeatureSupport.SetSensorSubtrahendPerSide)) {
+				await activeConfigurator.setSensorSubtrahend(
+					DrumSide.LeftKa,
+					store.get(leftKaSensorSubtrahendAtom),
+				);
+				await activeConfigurator.setSensorSubtrahend(
+					DrumSide.LeftDon,
+					store.get(leftDonSensorSubtrahendAtom),
+				);
+				await activeConfigurator.setSensorSubtrahend(
+					DrumSide.RightDon,
+					store.get(rightDonSensorSubtrahendAtom),
+				);
+				await activeConfigurator.setSensorSubtrahend(
+					DrumSide.RightKa,
+					store.get(rightKaSensorSubtrahendAtom),
+				);
+			}
+
+			if (supported.has(FeatureSupport.SetSensorKeyPerSide)) {
+				await activeConfigurator.setKeyBinding(
+					DrumSide.LeftKa,
+					store.get(leftKaKeyAtom),
+				);
+				await activeConfigurator.setKeyBinding(
+					DrumSide.LeftDon,
+					store.get(leftDonKeyAtom),
+				);
+				await activeConfigurator.setKeyBinding(
+					DrumSide.RightDon,
+					store.get(rightDonKeyAtom),
+				);
+				await activeConfigurator.setKeyBinding(
+					DrumSide.RightKa,
+					store.get(rightKaKeyAtom),
+				);
+			}
+
+			if (supported.has(FeatureSupport.SetCustomKey1))
+				await activeConfigurator.setCustomKeyBinding(
+					1,
+					store.get(customButton1KeyAtom),
+				);
+			if (supported.has(FeatureSupport.SetCustomKey2))
+				await activeConfigurator.setCustomKeyBinding(
+					2,
+					store.get(customButton2KeyAtom),
+				);
+			if (supported.has(FeatureSupport.SetCustomKey3))
+				await activeConfigurator.setCustomKeyBinding(
+					3,
+					store.get(customButton3KeyAtom),
+				);
+			if (supported.has(FeatureSupport.SetCustomKey4))
+				await activeConfigurator.setCustomKeyBinding(
+					4,
+					store.get(customButton4KeyAtom),
+				);
+
+			await activeConfigurator.saveSettings();
 
 			store.set(shouldSaveConfigAtom, false);
 		} catch (e) {

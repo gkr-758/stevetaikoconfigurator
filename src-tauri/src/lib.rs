@@ -98,6 +98,16 @@ fn reopen_device(
 }
 
 #[tauri::command]
+fn close_device(
+    hid_device: State<HidDeviceState>,
+) -> Result<(), InvokeError> {
+    let mut hid_device = hid_device.lock().map_err(InvokeError::from_error)?;
+    *hid_device = None;
+    println!("device closed");
+    Ok(())
+}
+
+#[tauri::command]
 fn get_all_hids(hid: tauri::State<HidApiState>) -> Result<serde_json::Value, InvokeError> {
     let mut hid = hid.write().map_err(InvokeError::from_error)?;
     hid.reset_devices().map_err(InvokeError::from_error)?;
@@ -193,6 +203,7 @@ pub fn run() {
             recv_feature_report_from_hid,
             get_all_hids,
             reopen_device,
+            close_device,
             get_connected_hid,
         ])
         .run(tauri::generate_context!())

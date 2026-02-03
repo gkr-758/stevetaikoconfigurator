@@ -1,8 +1,8 @@
-import { connectedHidDevicesAtom } from "$/states/main.ts";
-import { recvFeatureReportFromHid } from "$/utils/hid.ts";
+import { activeConfiguratorAtom } from "$/states/main.ts";
+import { DrumSensorValues, SensorValueUpdateEventType } from "$/taiko/base";
 import { Flex, Text } from "@radix-ui/themes";
 import { Progress } from "@radix-ui/themes/src/index.js";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { atom, useAtom, useAtomValue, useStore } from "jotai";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -25,36 +25,32 @@ const SIDE_COLOR = {
 export const SingleSensorVisualizer = (props: {
 	side: keyof typeof DATA_OFFSET;
 }) => {
-	const hidDevice = useAtomValue(connectedHidDevicesAtom);
+	const activeConfigurator = useAtomValue(activeConfiguratorAtom);
+	const store = useStore();
 	const sensorValueAtom = useMemo(() => atom(0), []);
 	const [sensorValue, setSensorValue] = useAtom(sensorValueAtom);
 
 	useEffect(() => {
-		if (!hidDevice) return;
-		let canceled = false;
+		if (!activeConfigurator) return;
 
-		const onFrame = async () => {
-			if (canceled) return;
-			try {
-				const view = await recvFeatureReportFromHid(0x10);
-				if (canceled) return;
-				if (view) {
-					const value = view.getUint32(DATA_OFFSET[props.side], true);
-					setSensorValue(Math.max(0, Math.min(value, MAX_SENSOR_VALUE)));
-				}
-			} catch {
-				setSensorValue(0);
-			}
-			if (canceled) return;
-			requestAnimationFrame(onFrame);
+		const onSensorValueUpdate = (event: CustomEvent<DrumSensorValues>) => {
+			const data = event.detail;
+			const value = data[props.side];
+			setSensorValue(Math.max(0, Math.min(value, MAX_SENSOR_VALUE)));
 		};
 
-		onFrame();
+		activeConfigurator.addEventListener(
+			SensorValueUpdateEventType,
+			onSensorValueUpdate as EventListener,
+		);
 
 		return () => {
-			canceled = true;
+			activeConfigurator.removeEventListener(
+				SensorValueUpdateEventType,
+				onSensorValueUpdate as EventListener,
+			);
 		};
-	}, [hidDevice, props.side]);
+	}, [activeConfigurator, props.side, store]);
 
 	return (
 		<Progress
@@ -79,38 +75,31 @@ export const SingleLabeledSensorVisualizer = (props: {
 		return props.side;
 	}, [t, props.side]);
 
-	const hidDevice = useAtomValue(connectedHidDevicesAtom);
+	const activeConfigurator = useAtomValue(activeConfiguratorAtom);
+	const store = useStore();
 	const sensorValueAtom = useMemo(() => atom(0), []);
 	const [sensorValue, setSensorValue] = useAtom(sensorValueAtom);
 
 	useEffect(() => {
-		if (!hidDevice) return;
-		let canceled = false;
-
-		const onFrame = async () => {
-			if (canceled) return;
-			try {
-				const data = await recvFeatureReportFromHid(0x10);
-				if (canceled) return;
-				if (data) {
-					const view = new DataView(data.buffer);
-
-					const value = view.getUint32(DATA_OFFSET[props.side], true);
-					setSensorValue(Math.max(0, Math.min(value, MAX_SENSOR_VALUE)));
-				}
-			} catch {
-				setSensorValue(0);
-			}
-			if (canceled) return;
-			requestAnimationFrame(onFrame);
+		if (!activeConfigurator) return;
+		const onSensorValueUpdate = (event: CustomEvent<DrumSensorValues>) => {
+			const data = event.detail;
+			const value = data[props.side];
+			setSensorValue(Math.max(0, Math.min(value, MAX_SENSOR_VALUE)));
 		};
 
-		onFrame();
+		activeConfigurator.addEventListener(
+			SensorValueUpdateEventType,
+			onSensorValueUpdate as EventListener,
+		);
 
 		return () => {
-			canceled = true;
+			activeConfigurator.removeEventListener(
+				SensorValueUpdateEventType,
+				onSensorValueUpdate as EventListener,
+			);
 		};
-	}, [hidDevice, props.side]);
+	}, [activeConfigurator, props.side, store]);
 
 	return (
 		<Flex direction="column" align="center" gap="2">

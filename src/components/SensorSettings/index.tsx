@@ -1,4 +1,5 @@
 import {
+	activeConfiguratorAtom,
 	doubleSideHitDetectionAtom,
 	ledHitIndicatorAtom,
 	leftKaSensorSubtrahendAtom,
@@ -8,8 +9,9 @@ import {
 	shouldSaveConfigAtom,
 	triggerThresholdAtom,
 } from "$/states/main.ts";
+import { FeatureSupport } from "$/taiko/base.ts";
 import { Flex, TextField, Box, Slider, Text, Switch } from "@radix-ui/themes";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useSetAtom, useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -231,15 +233,28 @@ const DoubleSideHitDetectionSetting = () => {
 };
 
 export const SensorSettings = () => {
+	const configurator = useAtomValue(activeConfiguratorAtom);
+	const supportedFeatures = configurator?.supportedFeatures();
+
 	return (
 		<Flex direction="column" gap="4" my="6">
-			<TriggerThresholdSetting />
-			<LedHitIndicatorSetting />
-			<DoubleSideHitDetectionSetting />
-			<SensorSubtrahendSetting side="leftKa" />
-			<SensorSubtrahendSetting side="leftDon" />
-			<SensorSubtrahendSetting side="rightDon" />
-			<SensorSubtrahendSetting side="rightKa" />
+			{supportedFeatures?.has(FeatureSupport.SetSensorTriggerThrehold) && (
+				<TriggerThresholdSetting />
+			)}
+			{supportedFeatures?.has(FeatureSupport.SetLEDHitIndicator) && (
+				<LedHitIndicatorSetting />
+			)}
+			{supportedFeatures?.has(FeatureSupport.SetBothSideHitJudge) && (
+				<DoubleSideHitDetectionSetting />
+			)}
+			{supportedFeatures?.has(FeatureSupport.SetSensorSubtrahendPerSide) && (
+				<>
+					<SensorSubtrahendSetting side="leftKa" />
+					<SensorSubtrahendSetting side="leftDon" />
+					<SensorSubtrahendSetting side="rightDon" />
+					<SensorSubtrahendSetting side="rightKa" />
+				</>
+			)}
 		</Flex>
 	);
 };
