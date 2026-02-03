@@ -115,7 +115,9 @@ export const TaikoCatzV4Settings = () => {
 	};
 
 	if (!settings)
-		return <Text>{t("page.config.taikocatzv4.loading", "正在读取配置...")}</Text>;
+		return (
+			<Text>{t("page.config.taikocatzv4.loading", "正在读取配置...")}</Text>
+		);
 
 	return (
 		<>
@@ -125,10 +127,10 @@ export const TaikoCatzV4Settings = () => {
 				</Callout.Icon>
 				<Callout.Text>
 					<b>
-					{t(
-						"page.config.taikocatzv4.bannerHint.title",
-						"谨慎使用：尚在开发测试阶段",
-					)}
+						{t(
+							"page.config.taikocatzv4.bannerHint.title",
+							"谨慎使用：尚在开发测试阶段",
+						)}
 					</b>
 					<br />
 					{t(
@@ -189,7 +191,10 @@ export const TaikoCatzV4Settings = () => {
 						</Flex>
 						<Flex justify="between" align="center" gap="2">
 							<Text size="2">
-								{t("page.config.taikocatzv4.sensitivity.overall.label", "整体灵敏度")}
+								{t(
+									"page.config.taikocatzv4.sensitivity.overall.label",
+									"整体灵敏度",
+								)}
 							</Text>
 							<Select.Root
 								value={settings.overallSensitivity.toString()}
@@ -373,7 +378,10 @@ export const TaikoCatzV4Settings = () => {
 							</Text>
 							<Flex justify="between">
 								<Text size="2">
-									{t("page.config.taikocatzv4.performance.keyPressDuration.label", "按键时长")}
+									{t(
+										"page.config.taikocatzv4.performance.keyPressDuration.label",
+										"按键时长",
+									)}
 								</Text>
 								<Text size="2">{settings.keyPressDurationMs}ms</Text>
 							</Flex>

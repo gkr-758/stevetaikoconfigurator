@@ -180,10 +180,7 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 		buffer[0] = 0x01; // Report ID
 		buffer.set(kSettingsHeader, 1);
 
-		const body = new DataView(
-			buffer.buffer,
-			kCrcRegionBegin,
-		);
+		const body = new DataView(buffer.buffer, kCrcRegionBegin);
 
 		body.setUint8(0, 0x01);
 		body.setUint8(2, this.settings.keyboardMapping);
@@ -195,12 +192,7 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 		body.setUint8(12, this.settings.overallSensitivity);
 		body.setUint8(13, this.settings.drumrollLevel);
 
-		const crc = this.crc32(
-			new Uint8Array(
-				buffer.buffer,
-				kCrcRegionBegin,
-			),
-		);
+		const crc = this.crc32(new Uint8Array(buffer.buffer, kCrcRegionBegin));
 		const dataView = new DataView(buffer.buffer);
 		dataView.setUint32(kCrcOffset, crc, true);
 

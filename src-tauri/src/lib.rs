@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     ffi::CString,
     sync::{Mutex, RwLock},
 };
@@ -10,16 +11,17 @@ use hidapi::{HidApi, HidDevice};
 use tauri::{ipc::InvokeError, State};
 
 type HidApiState = RwLock<HidApi>;
-type HidDeviceState = Mutex<Option<HidDevice>>;
+type HidDeviceState = Mutex<HashMap<String, HidDevice>>;
 
 #[tauri::command]
 fn send_feature_report_to_hid(
     hid_device: State<HidDeviceState>,
     hid: State<HidApiState>,
+    path: String,
     value: Vec<u8>,
 ) -> Result<(), InvokeError> {
     let mut hid_device = hid_device.lock().map_err(InvokeError::from_error)?;
-    if let Some(device) = hid_device.as_mut() {
+    if let Some(device) = hid_device.get_mut(&path) {
         let info = device.get_device_info().map_err(InvokeError::from_error)?;
         let path = info.path();
         if !hid
@@ -33,14 +35,17 @@ fn send_feature_report_to_hid(
             )));
         }
 
-        println!("send_feature_report_to_hid: {:?}", value);
+        println!(
+            "send_feature_report_to_hid: {} {value:?}",
+            path.to_string_lossy()
+        );
 
         dbg!(device
             .send_feature_report(&value)
             .map_err(InvokeError::from_error)?);
     } else {
         return Err(InvokeError::from_anyhow(anyhow::anyhow!(
-            "device not found or not opened"
+            "device not found or not opened: {path}"
         )));
     }
     Ok(())
@@ -50,10 +55,11 @@ fn send_feature_report_to_hid(
 fn recv_feature_report_from_hid(
     hid_device: State<HidDeviceState>,
     hid: State<HidApiState>,
+    path: String,
     report_id: u8,
 ) -> Result<Vec<u8>, InvokeError> {
     let mut hid_device = hid_device.lock().map_err(InvokeError::from_error)?;
-    if let Some(device) = hid_device.as_mut() {
+    if let Some(device) = hid_device.get_mut(&path) {
         let info = device.get_device_info().map_err(InvokeError::from_error)?;
         let path = info.path();
         if !hid
@@ -75,7 +81,7 @@ fn recv_feature_report_from_hid(
         Ok(buf[..size].to_vec())
     } else {
         Err(InvokeError::from_anyhow(anyhow::anyhow!(
-            "device not found or not opened"
+            "device not found or not opened: {path}"
         )))
     }
 }
@@ -92,18 +98,16 @@ fn reopen_device(
     let device = hid
         .open_path(device_path.as_c_str())
         .map_err(InvokeError::from_error)?;
-    *hid_device = Some(device);
+    hid_device.insert(device_path.to_string_lossy().to_string(), device);
     println!("device reopened: {}", device_path.to_string_lossy());
     Ok(())
 }
 
 #[tauri::command]
-fn close_device(
-    hid_device: State<HidDeviceState>,
-) -> Result<(), InvokeError> {
+fn close_device(hid_device: State<HidDeviceState>, path: String) -> Result<(), InvokeError> {
     let mut hid_device = hid_device.lock().map_err(InvokeError::from_error)?;
-    *hid_device = None;
-    println!("device closed");
+    hid_device.remove(&path);
+    println!("device closed: {}", path);
     Ok(())
 }
 
@@ -113,6 +117,8 @@ fn get_all_hids(hid: tauri::State<HidApiState>) -> Result<serde_json::Value, Inv
     hid.reset_devices().map_err(InvokeError::from_error)?;
 
     hid.add_devices(0x303A, 0x456D)
+        .map_err(InvokeError::from_error)?;
+    hid.add_devices(0x16c0, 0x27d9)
         .map_err(InvokeError::from_error)?;
 
     Ok(serde_json::json!(hid
@@ -131,38 +137,23 @@ fn get_all_hids(hid: tauri::State<HidApiState>) -> Result<serde_json::Value, Inv
 }
 
 #[tauri::command]
-fn get_connected_hid(
-    hid: State<HidApiState>,
+fn get_connected_hids(
     hid_device: tauri::State<HidDeviceState>,
 ) -> Result<serde_json::Value, InvokeError> {
     let hid_device = hid_device.lock().map_err(InvokeError::from_error)?;
-    if let Some(device) = hid_device.as_ref() {
-        match device.get_device_info() {
-            Ok(info) => {
-                let path = info.path();
-                if !hid
-                    .read()
-                    .map_err(InvokeError::from_error)?
-                    .device_list()
-                    .any(|d| d.path() == path)
-                {
-                    return Ok(serde_json::Value::Null);
-                }
-
-                Ok(serde_json::json!({
-                    "manufacturer": info.manufacturer_string(),
-                    "product": info.product_string(),
-                    "serialNumber": info.serial_number(),
-                    "vendorId": info.vendor_id(),
-                    "productId": info.product_id(),
-                    "path": info.path().to_string_lossy(),
-                }))
-            }
-            Err(_) => Ok(serde_json::Value::Null),
-        }
-    } else {
-        Ok(serde_json::Value::Null)
+    let mut result = Vec::with_capacity(hid_device.len());
+    for device in hid_device.values() {
+        let info = device.get_device_info().map_err(InvokeError::from_error)?;
+        result.push(serde_json::json!({
+            "manufacturer": info.manufacturer_string(),
+            "product": info.product_string(),
+            "serialNumber": info.serial_number(),
+            "vendorId": info.vendor_id(),
+            "productId": info.product_id(),
+            "path": info.path().to_string_lossy(),
+        }));
     }
+    Ok(serde_json::json!(result))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -204,7 +195,7 @@ pub fn run() {
             get_all_hids,
             reopen_device,
             close_device,
-            get_connected_hid,
+            get_connected_hids,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

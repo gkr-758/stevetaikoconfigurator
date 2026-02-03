@@ -39,10 +39,7 @@ function App() {
 			try {
 				const win = getCurrentWindow();
 
-				version().then((v) => {
-					console.log(v);
-					setHasBackground(semverLt(v, "10.0.22000"));
-				});
+				setHasBackground(semverLt(version(), "10.0.22000"));
 
 				win.show();
 			} catch {}
