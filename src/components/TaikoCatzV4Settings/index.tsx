@@ -133,7 +133,7 @@ export const TaikoCatzV4Settings = () => {
 					<br />
 					{t(
 						"page.config.taikocatzv4.bannerHint.detail1",
-						"目前未必保证功能完善稳定，请以官方配置工具为准。",
+						"此工具联合了猫鼓电控作者参与开发，但目前尚未完善稳定，请以官方原本发布的配置工具为准。",
 					)}
 					<br />
 					{t(

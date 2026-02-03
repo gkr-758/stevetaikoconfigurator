@@ -64,7 +64,7 @@
         "loading": "Loading configurations...",
         "bannerHint": {
           "title": "Caution: Under Development and Testing",
-          "detail1": "Functionality may be incomplete or unstable, please refer to official configuration tools.",
+          "detail1": "This tool is developed in collaboration with the author of TaikoCatz dongle, but it is not yet fully stable. Please refer to the official configuration tool as the primary source.",
           "detail2": "Upon saving, the dongle will play 5 seconds of music and then automatically restart. Reconfiguration will require reconnecting the device."
         },
         "sensitivity": {
