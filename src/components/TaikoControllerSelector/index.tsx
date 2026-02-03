@@ -45,6 +45,7 @@ const TaikoControllerSelectorItem = (props: {
 	onSelected?: () => void;
 }) => {
 	const { t } = useTranslation();
+	const store = useStore();
 	const setOpened = useSetAtom(taikoControllerSelectorOpenedAtom);
 	const setConnectedDevice = useSetAtom(connectedHidDevicesAtom);
 	const setActiveConfigurator = useSetAtom(activeConfiguratorAtom);
@@ -58,6 +59,10 @@ const TaikoControllerSelectorItem = (props: {
 			}}
 			value={props.hidDevice.path}
 			onClick={async () => {
+				const currentConfigurator = store.get(activeConfiguratorAtom);
+				if (currentConfigurator) {
+					await currentConfigurator[Symbol.asyncDispose]();
+				}
 				setConnectedDevice(null);
 				setOpening(true);
 				try {
