@@ -61,7 +61,7 @@
         }
       },
       "taikocatzv4": {
-        "loading": "Loading configuration...",
+        "loading": "Loading configurations...",
         "bannerHint": {
           "title": "Caution: Under Development and Testing",
           "detail1": "Functionality may be incomplete or unstable, please refer to official configuration tools.",
@@ -69,7 +69,7 @@
         },
         "sensitivity": {
           "label": "Sensitivity",
-          "tooltip": "Adjust sensitivity of each hit area and overall sensitivity multiplier.<1></1>If there is too much crosstalk, try reducing the sensitivity of the corresponding area.",
+          "tooltip": "Adjust sensitivity of each hit area and overall sensitivity multiplier.<1></1>Higher sensitivity makes lighter hit recognizable as valid hits.<3></3>Tuning relative sensitivity may help reduce crosstalk issues caused by structural and sensor sensitivity inconsistencies among different hit areas.",
           "sides": {
             "leftKa": "Left Ka",
             "leftDon": "Left Don",
@@ -89,19 +89,23 @@
         },
         "performance": {
           "label": "Performance",
-          "tooltip": "This affects hit recognition stability and drumroll performance.<1></1>Longer key press duration causes latency. Shorter duration might cause the game to miss inputs.<3></3>If unsure or playing official games, use Balanced for most cases.<5></5>If using emulators or games <7>based on key events (or buffered input)</7>, set to minimum duration for lowest latency and best drumroll experience.",
+          "tooltip": "Adjust the balance between performance and reliability.",
           "drumrollLevel": {
             "label": "Drumroll Level",
+            "tooltip": "Adjust the balance between drumroll performance and reliability.<1></1>Higher drumroll levels detect more hits during rapid, machine-gun-style rolls, but increase the risk of crosstalk and double-hits.<3></3>Because drum design and build quality vary, you may need to compromise between performance and reliability.<5></5>This setting affects hit detection: higher levels are more likely to register borderline impacts as hits, while lower levels are more conservative and will reject ambiguous signals like crosstalk or double-hits.",
             "options": {
-              "fallback": "Fallback (Reliability++, Drumroll--, 16ms)",
-              "level1": "Level 1 (Reliability+, Drumroll-, 16ms)",
-              "level2": "Level 2 (Balanced, 10ms)",
-              "level3": "Level 3 (Reliability-, Drumroll+, 8ms)",
-              "level4": "Level 4 (Reliability--, Drumroll++, 6ms)"
+              "fallback": "Fallback (Reliability++, Drumroll--, preset 16ms)",
+              "level1": "Level 1 (Reliability+, Drumroll-, preset 16ms)",
+              "level2": "Level 2 (Balanced, preset 10ms)",
+              "level3": "Level 3 (Reliability-, Drumroll+, preset 8ms)",
+              "level4": "Level 4 (Reliability--, Drumroll++, preset 6ms)"
             }
           },
-          "usePresetDrumroll": "Use default duration by drum-roll level",
-          "keyPressDuration": "Key Press Duration"
+          "usePresetDrumroll": "Use default duration by drumroll level",
+          "keyPressDuration": {
+            "label": "Key Press Duration",
+            "tooltip": "Turn off to use a custom key press duration (milliseconds).<1></1>Applicable to keyboard mode and generic gamepad mode.<3></3>Many games based on polling rather than event input require longer key press duration to consistently register inputs. Too short duration may make these games randomly miss some hits.<5></5>Longer duration may make diddles or drumrolls difficult even with high drumroll level."
+          }
         },
         "others": {
           "label": "Others",

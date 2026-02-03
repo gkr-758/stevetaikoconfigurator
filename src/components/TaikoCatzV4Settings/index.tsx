@@ -156,7 +156,9 @@ export const TaikoCatzV4Settings = () => {
 							<Trans i18nKey="page.config.taikocatzv4.sensitivity.tooltip">
 								调整各个敲击区域的灵敏度以及整体灵敏度倍率
 								<br />
-								如果串音较多，可以尝试降低对应区域的灵敏度
+								灵敏度越高，越轻的敲击也会被判定为有效敲击。
+								<br />
+								调节相对灵敏度有助于减少因不同位置之间结构与传感器的差别产生的串音问题。
 							</Trans>
 						</Text>
 					}
@@ -253,12 +255,34 @@ export const TaikoCatzV4Settings = () => {
 						}
 					>
 						<Flex direction="column" gap="2">
-							<Text size="2">
-								{t(
-									"page.config.taikocatzv4.performance.drumrollLevel.label",
-									"连打性能等级",
-								)}
-							</Text>
+							<Flex align="center" gap="2">
+								<Text size="2">
+									{t(
+										"page.config.taikocatzv4.performance.drumrollLevel.label",
+										"连打性能等级",
+									)}
+								</Text>
+								<HoverCard.Root>
+									<HoverCard.Trigger>
+										<IconButton variant="ghost" color="gray" size="1">
+											<InfoCircledIcon />
+										</IconButton>
+									</HoverCard.Trigger>
+									<HoverCard.Content size="1" align="center">
+										<Text size="2" as="div">
+											<Trans i18nKey="page.config.taikocatzv4.performance.drumrollLevel.tooltip">
+												调整连打性能与可靠性之间的妥协取向
+												<br />
+												更高的连打等级可以在高速连打时识别出更多有效击打数，但也会增加串音和误判双击的可能性。
+												<br />
+												由于不同设计和做工的鼓体在物理特性上存在差异，你可能需要在连打性能和可靠性之间进行权衡取舍。
+												<br />
+												此设置会影响击打判定：等级越高越容易将模糊的震动判定为有效击打；等级越低则更保守，会过滤看起来像串音或误判双击之类的不明确信号。
+											</Trans>
+										</Text>
+									</HoverCard.Content>
+								</HoverCard.Root>
+							</Flex>
 							<Select.Root
 								value={settings.drumrollLevel.toString()}
 								onValueChange={(v) => {
@@ -277,57 +301,79 @@ export const TaikoCatzV4Settings = () => {
 									<Select.Item value={DrumrollLevel.Fallback.toString()}>
 										{t(
 											"page.config.taikocatzv4.performance.drumrollLevel.options.fallback",
-											"回退（可靠性++，连打性能--，按键时长16ms）",
+											"保守模式（可靠性++，连打性能--，预设按键时长16ms）",
 										)}
 									</Select.Item>
 									<Select.Item value={DrumrollLevel.Level1.toString()}>
 										{t(
 											"page.config.taikocatzv4.performance.drumrollLevel.options.level1",
-											"等级 1（可靠性+，连打性能-，按键时长16ms）",
+											"等级 1（可靠性+，连打性能-，预设按键时长16ms）",
 										)}
 									</Select.Item>
 									<Select.Item value={DrumrollLevel.Level2.toString()}>
 										{t(
 											"page.config.taikocatzv4.performance.drumrollLevel.options.level2",
-											"等级 2（平衡性能，按键时长10ms）",
+											"等级 2（平衡性能，预设按键时长10ms）",
 										)}
 									</Select.Item>
 									<Select.Item value={DrumrollLevel.Level3.toString()}>
 										{t(
 											"page.config.taikocatzv4.performance.drumrollLevel.options.level3",
-											"等级 3（可靠性-，连打性能+，按键时长8ms）",
+											"等级 3（可靠性-，连打性能+，预设按键时长8ms）",
 										)}
 									</Select.Item>
 									<Select.Item value={DrumrollLevel.Level4.toString()}>
 										{t(
 											"page.config.taikocatzv4.performance.drumrollLevel.options.level4",
-											"等级 4（可靠性--，连打性能++，按键时长6ms）",
+											"等级 4（可靠性--，连打性能++，预设按键时长6ms）",
 										)}
 									</Select.Item>
 								</Select.Content>
 							</Select.Root>
 							<Text size="2" as="label">
-								<Switch
-									mr="2"
-									checked={isPresetLocked}
-									onCheckedChange={(c) => {
-										setIsPresetLocked(c);
-										if (c) {
-											updateConfig({
-												keyPressDurationMs:
-													DRUMROLL_PRESETS[settings.drumrollLevel],
-											});
-										}
-									}}
-								/>
-								{t(
-									"page.config.taikocatzv4.performance.usePresetDrumroll",
-									"使用预设连打按键时长",
-								)}
+								<Flex align="center" gap="2">
+									<Switch
+										mr="2"
+										checked={isPresetLocked}
+										onCheckedChange={(c) => {
+											setIsPresetLocked(c);
+											if (c) {
+												updateConfig({
+													keyPressDurationMs:
+														DRUMROLL_PRESETS[settings.drumrollLevel],
+												});
+											}
+										}}
+									/>
+									{t(
+										"page.config.taikocatzv4.performance.usePresetDrumroll",
+										"使用预设连打按键时长",
+									)}
+									<HoverCard.Root>
+										<HoverCard.Trigger>
+											<IconButton variant="ghost" color="gray" size="1">
+												<InfoCircledIcon />
+											</IconButton>
+										</HoverCard.Trigger>
+										<HoverCard.Content size="1" align="center">
+											<Text size="2" as="div">
+												<Trans i18nKey="page.config.taikocatzv4.performance.keyPressDuration.tooltip">
+													关闭此选项以使用自定义按键时长（毫秒）。
+													<br />
+													对键盘模式和通用手柄模式生效。
+													<br />
+													许多基于轮询而非事件输入的游戏需要更长的按键时长才能稳定识别输入。按键时长过短会导致这些游戏随机吃音。
+													<br />
+													更长的按键时长可能会导致双跳或连打变得困难，即使连打等级较高。
+												</Trans>
+											</Text>
+										</HoverCard.Content>
+									</HoverCard.Root>
+								</Flex>
 							</Text>
 							<Flex justify="between">
 								<Text size="2">
-									{t("page.config.taikocatzv4.performance.keyPressDuration", "按键时长")}
+									{t("page.config.taikocatzv4.performance.keyPressDuration.label", "按键时长")}
 								</Text>
 								<Text size="2">{settings.keyPressDurationMs}ms</Text>
 							</Flex>
