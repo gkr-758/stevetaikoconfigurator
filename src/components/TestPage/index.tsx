@@ -13,7 +13,7 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import { atom, useAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 import { TaikoVisualizerForJoystick } from "../TaikoVisualizer/joystick.tsx";
-import classNames from "classnames";
+import clsx from "clsx";
 import { Trans, useTranslation } from "react-i18next";
 
 const useAtomState = <T,>(value: T) =>
@@ -166,10 +166,10 @@ const KeyboardTestEntry = () => {
 							鼓面连打计数
 						</Trans>
 					</Text>
-					<Box className={classNames(styles.surface, styles.renda)}>
+					<Box className={clsx(styles.surface, styles.renda)}>
 						{surfaceRenda}
 					</Box>
-					<Box className={classNames(styles.surface, styles.renda)}>
+					<Box className={clsx(styles.surface, styles.renda)}>
 						{t("page.test.rendaSpeed.label", "{speed} 下/秒", {
 							speed: surfaceRendaTimes.length,
 						})}
@@ -179,8 +179,8 @@ const KeyboardTestEntry = () => {
 					<Text size="2" color="blue">
 						<Trans i18nKey="page.test.kaRendaCounter.label">鼓边连打计数</Trans>
 					</Text>
-					<Box className={classNames(styles.rim, styles.renda)}>{rimRenda}</Box>
-					<Box className={classNames(styles.rim, styles.renda)}>
+					<Box className={clsx(styles.rim, styles.renda)}>{rimRenda}</Box>
+					<Box className={clsx(styles.rim, styles.renda)}>
 						{t("page.test.rendaSpeed.label", "{speed} 下/秒", {
 							speed: rimRendaTimes.length,
 						})}
@@ -367,10 +367,10 @@ const JoystickTestEntry = ({
 							鼓面连打计数
 						</Trans>
 					</Text>
-					<Box className={classNames(styles.surface, styles.renda)}>
+					<Box className={clsx(styles.surface, styles.renda)}>
 						{surfaceRenda}
 					</Box>
-					<Box className={classNames(styles.surface, styles.renda)}>
+					<Box className={clsx(styles.surface, styles.renda)}>
 						{t("page.test.rendaSpeed.label", "{speed} 下/秒", {
 							speed: surfaceRendaTimes.length,
 						})}
@@ -380,8 +380,8 @@ const JoystickTestEntry = ({
 					<Text size="2" color="blue">
 						<Trans i18nKey="page.test.kaRendaCounter.label">鼓边连打计数</Trans>
 					</Text>
-					<Box className={classNames(styles.rim, styles.renda)}>{rimRenda}</Box>
-					<Box className={classNames(styles.rim, styles.renda)}>
+					<Box className={clsx(styles.rim, styles.renda)}>{rimRenda}</Box>
+					<Box className={clsx(styles.rim, styles.renda)}>
 						{t("page.test.rendaSpeed.label", "{speed} 下/秒", {
 							speed: rimRendaTimes.length,
 						})}

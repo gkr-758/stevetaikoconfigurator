@@ -137,34 +137,56 @@ export class TaikoConfiguratorBase
 		return;
 	}
 
-	async setTriggerThreshold(value: number): Promise<void> {
+	async setTriggerThreshold(
+		// @ts-ignore unused parameter
+		value: number,
+	): Promise<void> {
 		throw new FeatureUnsupportedError(FeatureSupport.SetSensorTriggerThrehold);
 	}
 
-	async setBothSideHitJudge(enabled: boolean): Promise<void> {
+	async setBothSideHitJudge(
+		// @ts-ignore unused parameter
+		enabled: boolean,
+	): Promise<void> {
 		throw new FeatureUnsupportedError(FeatureSupport.SetBothSideHitJudge);
 	}
 
-	async setLedHitIndicator(enabled: boolean): Promise<void> {
+	async setLedHitIndicator(
+		// @ts-ignore unused parameter
+		enabled: boolean,
+	): Promise<void> {
 		throw new FeatureUnsupportedError(FeatureSupport.SetLEDHitIndicator);
 	}
 
-	async setSensorSubtrahend(side: DrumSide, value: number): Promise<void> {
+	async setSensorSubtrahend(
+		// @ts-ignore unused parameter
+		side: DrumSide, // @ts-ignore unused parameter
+		value: number,
+	): Promise<void> {
 		throw new FeatureUnsupportedError(
 			FeatureSupport.SetSensorSubtrahendPerSide,
 		);
 	}
 
-	async setKeyInvokeDuration(value: number): Promise<void> {
+	async setKeyInvokeDuration(
+		// @ts-ignore unused parameter
+		value: number,
+	): Promise<void> {
 		throw new FeatureUnsupportedError(FeatureSupport.SetSensorKeyDuration);
 	}
 
-	async setKeyBinding(side: DrumSide, key: KeyboardUsage): Promise<void> {
+	async setKeyBinding(
+		// @ts-ignore unused parameter
+		side: DrumSide,
+		// @ts-ignore unused parameter
+		key: KeyboardUsage,
+	): Promise<void> {
 		throw new FeatureUnsupportedError(FeatureSupport.SetSensorKeyPerSide);
 	}
 
 	async setCustomKeyBinding(
 		index: 1 | 2 | 3 | 4,
+		// @ts-ignore unused parameter
 		key: KeyboardUsage,
 	): Promise<void> {
 		switch (index) {

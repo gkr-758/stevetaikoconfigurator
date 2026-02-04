@@ -1,11 +1,5 @@
-import { connectedHidDevicesAtom, hidDevicesAtom } from "$/states/main.ts";
-import { eqSet } from "$/utils/eq-set.ts";
-import { HidDevice } from "$/utils/hid.ts";
-import { useStore } from "jotai";
-import { useEffect } from "react";
-
 export const HidContext = () => {
-	const store = useStore();
+	// const store = useStore();
 
 	// if (import.meta.env.TAURI_ENV_PLATFORM) {
 	// 	useEffect(() => {

@@ -18,9 +18,7 @@ import {
 	rightKaKeyAtom,
 	rightKaSensorSubtrahendAtom,
 	triggerThresholdAtom,
-	type KeyboardUsage,
 } from "$/states/main.ts";
-import { eqSet } from "$/utils/eq-set.ts";
 import { type HidDeviceDesc, HidDevice } from "$/utils/hid.ts";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import {
