@@ -22,8 +22,9 @@ const kWriteSuccessPayload = new Uint8Array([
 	0x00, 0x00,
 ]);
 
-const kSettingsPayloadSize = 32;
+const kSettingsPayloadSize = 64;
 const kCrcRegionBegin = 16;
+const kCrcRegionLength = 16;
 const kCrcOffset = 12;
 
 export enum OverallSensitivity {
@@ -112,8 +113,8 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 			console.warn("Invalid settings header from TaikoCatz V4");
 			return null;
 		}
-		const body = new DataView(data.buffer, kCrcRegionBegin);
-		const crc = this.crc32(new Uint8Array(data.buffer, kCrcRegionBegin));
+		const body = new DataView(data.buffer, kCrcRegionBegin, kCrcRegionLength);
+		const crc = this.crc32(new Uint8Array(data.buffer, kCrcRegionBegin, kCrcRegionLength));
 		const storedCrc = data.getUint32(kCrcOffset, true);
 		if (crc !== storedCrc) {
 			console.warn(
@@ -175,7 +176,7 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 		buffer[0] = 0x01; // Report ID
 		buffer.set(kSettingsHeader, 1);
 
-		const body = new DataView(buffer.buffer, kCrcRegionBegin);
+		const body = new DataView(buffer.buffer, kCrcRegionBegin, kCrcRegionLength);
 
 		body.setUint8(0, 0x01);
 		body.setUint8(2, this.settings.keyboardMapping);
@@ -187,7 +188,7 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 		body.setUint8(12, this.settings.overallSensitivity);
 		body.setUint8(13, this.settings.drumrollLevel);
 
-		const crc = this.crc32(new Uint8Array(buffer.buffer, kCrcRegionBegin));
+		const crc = this.crc32(new Uint8Array(buffer.buffer, kCrcRegionBegin, kCrcRegionLength));
 		const dataView = new DataView(buffer.buffer);
 		dataView.setUint32(kCrcOffset, crc, true);
 
