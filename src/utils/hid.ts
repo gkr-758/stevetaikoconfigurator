@@ -107,7 +107,18 @@ export class HidDevice extends EventTarget implements AsyncDisposable {
 				value instanceof ArrayBuffer ? value : value.buffer,
 			);
 			const body = data.slice(1);
-			await this._internalDevice.sendFeatureReport(data[0], body);
+
+			// Send feature report with timeout.
+			const timeoutMs = 1000;
+			await Promise.race([
+				this._internalDevice.sendFeatureReport(data[0], body),
+				new Promise<never>((_, reject) => {
+					const timer = setTimeout(() => {
+						clearTimeout(timer);
+						reject(new Error("HID feature report timed out"));
+					}, timeoutMs);
+				}),
+			]);
 		}
 	}
 
