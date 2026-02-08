@@ -20,10 +20,10 @@ import {
 	triggerThresholdAtom,
 } from "$/states/main.ts";
 import { DrumSide, FeatureSupport } from "$/taiko/base.ts";
-import { Button } from "@radix-ui/themes";
+import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
 import { atom, useAtomValue, useStore } from "jotai";
-import { useCallback } from "react";
-import { Trans } from "react-i18next";
+import { useCallback, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 const savingConfigAtom = atom(false);
 
@@ -32,11 +32,14 @@ export const SaveConfigButton = () => {
 	const savingConfig = useAtomValue(savingConfigAtom);
 	const hidDevice = useAtomValue(connectedHidDevicesAtom);
 	const store = useStore();
+	const { t } = useTranslation();
+	const [saveError, setSaveError] = useState<string | null>(null);
 
 	const saveConfig = useCallback(async () => {
 		const activeConfigurator = store.get(activeConfiguratorAtom);
 		if (!activeConfigurator) return;
 		store.set(savingConfigAtom, true);
+		setSaveError(null);
 		try {
 			const supported = (activeConfigurator.constructor as any)
 				.supportedFeatures as Set<FeatureSupport>;
@@ -122,19 +125,61 @@ export const SaveConfigButton = () => {
 			store.set(shouldSaveConfigAtom, false);
 		} catch (e) {
 			console.error(e);
+			const errorMessage =
+				e instanceof Error ? e.message : e ? String(e) : "";
+			const fallbackMessage = t(
+				"dialogs.saveConfigError.unknown",
+				"Unknown error",
+			);
+			setSaveError(errorMessage.trim() ? errorMessage : fallbackMessage);
 		} finally {
 			store.set(savingConfigAtom, false);
 		}
-	}, [store]);
+	}, [store, t]);
 
 	return (
-		<Button
-			loading={savingConfig}
-			disabled={!shouldSaveConfig || !hidDevice}
-			variant={shouldSaveConfig ? "solid" : "surface"}
-			onClick={saveConfig}
-		>
-			<Trans i18nKey="topbar.saveConfigButton.label">保存设置</Trans>
-		</Button>
+		<>
+			<Dialog.Root
+				open={!!saveError}
+				onOpenChange={(open) => {
+					if (!open) setSaveError(null);
+				}}
+			>
+				<Dialog.Content>
+					<Dialog.Title>
+						<Trans i18nKey="dialogs.saveConfigError.title">
+							Failed to save settings
+						</Trans>
+					</Dialog.Title>
+					<Dialog.Description>
+						<Text>
+							<Trans
+								i18nKey="dialogs.saveConfigError.desc"
+								values={{ message: saveError ?? "" }}
+							>
+								Failed to save settings. Error: {saveError}
+							</Trans>
+						</Text>
+					</Dialog.Description>
+					<Flex direction="row-reverse">
+						<Dialog.Close>
+							<Button variant="soft">
+								<Trans i18nKey="dialogs.saveConfigError.close">
+									Close
+								</Trans>
+							</Button>
+						</Dialog.Close>
+					</Flex>
+				</Dialog.Content>
+			</Dialog.Root>
+			<Button
+				loading={savingConfig}
+				disabled={!shouldSaveConfig || !hidDevice}
+				variant={shouldSaveConfig ? "solid" : "surface"}
+				onClick={saveConfig}
+			>
+				<Trans i18nKey="topbar.saveConfigButton.label">保存设置</Trans>
+			</Button>
+		</>
 	);
 };

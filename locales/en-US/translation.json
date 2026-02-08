@@ -254,6 +254,12 @@
       "title": "Detected Taiko Controllers",
       "noControllerTip": "Can't detect any Taiko Controllers<1></1>Please check your connection between your computer and controllers.<3></3>And make sure your controller has been switched into keyboard mode."
     },
+    "saveConfigError": {
+      "title": "Failed to save settings",
+      "desc": "Failed to save settings. Error: {{message}}",
+      "close": "Close",
+      "unknown": "Unknown error"
+    },
     "webHidCheck": {
       "title": "WebHID API Unsupported",
       "desc": "This website requires browser with WebHID API supported. Please use the latest browser like Chrome / Chromium or Microsoft Edge. Or install desktop version of Steve Taiko Configurator.",
