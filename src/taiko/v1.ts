@@ -1,11 +1,11 @@
-import { HidDevice } from "$/utils/hid";
+import type { HidDevice } from "$/utils/hid";
 import {
-	DrumSensorValues,
 	DrumSide,
 	FeatureSupport,
-	KeyboardUsage,
 	SensorValueUpdateEventType,
 	TaikoConfiguratorBase,
+	type DrumSensorValues,
+	type KeyboardUsage,
 	type TaikoSettings,
 } from "./base";
 

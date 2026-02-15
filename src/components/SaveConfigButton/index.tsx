@@ -125,8 +125,7 @@ export const SaveConfigButton = () => {
 			store.set(shouldSaveConfigAtom, false);
 		} catch (e) {
 			console.error(e);
-			const errorMessage =
-				e instanceof Error ? e.message : e ? String(e) : "";
+			const errorMessage = e instanceof Error ? e.message : e ? String(e) : "";
 			const fallbackMessage = t(
 				"dialogs.saveConfigError.unknown",
 				"Unknown error",
@@ -164,9 +163,7 @@ export const SaveConfigButton = () => {
 					<Flex direction="row-reverse">
 						<Dialog.Close>
 							<Button variant="soft">
-								<Trans i18nKey="dialogs.saveConfigError.close">
-									Close
-								</Trans>
+								<Trans i18nKey="dialogs.saveConfigError.close">Close</Trans>
 							</Button>
 						</Dialog.Close>
 					</Flex>

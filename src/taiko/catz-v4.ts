@@ -1,4 +1,4 @@
-import { HidDevice } from "$/utils/hid";
+import type { HidDevice } from "$/utils/hid";
 import { DrumSide, FeatureSupport, TaikoConfiguratorBase } from "./base";
 
 // const kMagic = new Uint8Array([0x01, 0x53, 0x64, 0x54]);
@@ -104,7 +104,7 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 			console.warn("Failed to read settings from TaikoCatz V4");
 			return null;
 		}
-		if (data.byteLength != 32) {
+		if (data.byteLength !== 32) {
 			console.warn("Invalid settings length from TaikoCatz V4");
 			return null;
 		}
@@ -114,7 +114,9 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 			return null;
 		}
 		const body = new DataView(data.buffer, kCrcRegionBegin, kCrcRegionLength);
-		const crc = this.crc32(new Uint8Array(data.buffer, kCrcRegionBegin, kCrcRegionLength));
+		const crc = this.crc32(
+			new Uint8Array(data.buffer, kCrcRegionBegin, kCrcRegionLength),
+		);
 		const storedCrc = data.getUint32(kCrcOffset, true);
 		if (crc !== storedCrc) {
 			console.warn(
@@ -188,7 +190,9 @@ export class TaikoCatzV4Configurator extends TaikoConfiguratorBase {
 		body.setUint8(12, this.settings.overallSensitivity);
 		body.setUint8(13, this.settings.drumrollLevel);
 
-		const crc = this.crc32(new Uint8Array(buffer.buffer, kCrcRegionBegin, kCrcRegionLength));
+		const crc = this.crc32(
+			new Uint8Array(buffer.buffer, kCrcRegionBegin, kCrcRegionLength),
+		);
 		const dataView = new DataView(buffer.buffer);
 		dataView.setUint32(kCrcOffset, crc, true);
 
