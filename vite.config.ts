@@ -10,9 +10,12 @@ import jotaiDebugLabel from "jotai/babel/plugin-debug-label";
 import jotaiReactRefresh from "jotai/babel/plugin-react-refresh";
 
 const host = process.env.TAURI_DEV_HOST;
+const isGitHubPages = process.env.GITHUB_PAGES === "true";
+const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1];
 
 // https://vitejs.dev/config/
 export default defineConfig({
+	base: isGitHubPages && repositoryName ? `/${repositoryName}/` : "/",
 	plugins: [
 		react({
 			babel: {

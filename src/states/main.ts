@@ -2,8 +2,8 @@ import { KeyboardUsage } from "$/types/keyboard";
 import type { HidDeviceDesc } from "$/utils/hid.ts";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import languageResources from "virtual:i18next-loader";
 import { TaikoConfiguratorBase } from "$/taiko/base";
+import { resolveSupportedLanguage } from "../utils/language";
 
 export const activeConfiguratorAtom = atom<TaikoConfiguratorBase | null>(null);
 
@@ -41,5 +41,5 @@ export const enableSoundAtom = atomWithStorage("enableSound", true);
 
 export const languageAtom = atomWithStorage(
 	"language",
-	navigator.language in languageResources ? navigator.language : "zh-CN",
+	resolveSupportedLanguage(navigator.language),
 );

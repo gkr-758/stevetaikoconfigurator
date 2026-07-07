@@ -1,0 +1,271 @@
+{
+  "window": {
+    "title": "Steve Taiko Configurator"
+  },
+  "topbar": {
+    "page": {
+      "config": "設定",
+      "test": "テスト",
+      "about": "概要"
+    },
+    "languageSelector": {
+      "displayLanguage": {
+        "cimode": "ローカライズ ID"
+      }
+    },
+    "saveConfigButton": {
+      "label": "設定を保存"
+    }
+  },
+  "page": {
+    "about": {
+      "appDesc": "SteveTaikoCon コントローラーを設定し、あらゆる種類の Tatacon をテストするためのツールです。",
+      "freewareTip": "このツールはオープンソースのフリーソフトです。",
+      "downloadDesktopVersion": "Tauri デスクトップ版をダウンロード"
+    },
+    "config": {
+      "disabledTips": {
+        "webHidUnsupported": "お使いのブラウザーが WebHID API をサポートしていないため、設定ページは使用できません。",
+        "controllerNotConnected": "左上のボタンをクリックして太鼓コントローラーを接続してください。"
+      },
+      "tabs": {
+        "sensor": "センサー",
+        "keyBinding": "キー割り当て"
+      },
+      "keyBindingSettings": {
+        "sideKeyBinding": {
+          "label": "{side} のキー割り当て",
+          "description": "コントローラーのこの面/ボタンがヒット/押下されたときに、コントローラーがエミュレートして押すキーです。"
+        },
+        "keyInvokeDuration": {
+          "label": "キー押下時間",
+          "description": "キーをどのくらいの時間押し続けるかをミリ秒で指定します。0 にすると即座に解放します。<1></1>押下時間が長すぎると遅延の原因になります。短すぎるとゲームが入力を検出できない場合があります。<3></3>調整方法がわからない場合や公式ゲームを遊ぶ場合は、多くのケースで使える既定の 16ms にしてください。<5></5>エミュレーターや、<7>入力イベント</7>ベースのゲームでは、最小遅延と最良の連打体験のために 0 に設定できます。"
+        }
+      },
+      "sensorSettings": {
+        "sensorSubtrahend": {
+          "label": "{sensorSide} センサー値の減算値",
+          "description": "この側の信号値から指定した値を差し引き、発火に必要な力を増やします。既定値は 0 です。"
+        },
+        "triggerThreshold": {
+          "label": "判定しきい値",
+          "description": "いずれかのセンサー値がこの値を超えると判定状態に入ります。単位は電圧（mV）として考えて構いません。<1></1>値が低すぎるとクロストークの原因になり、高すぎるとより強く叩く必要があり、検出できないこともあります。<3></3>設定を調整したら、テストページで叩き具合を確認できます。"
+        },
+        "ledHitIndicator": {
+          "label": "LED ヒットインジケーターを有効にする",
+          "description": "判定時に本体 LED を点灯させてヒット結果を示します。赤は面、青は縁を表します。<1></1>コントローラーと PC の遅延確認にも使えます。（この LED はゼロ遅延と見なせます）"
+        },
+        "doubleSideHitDetection": {
+          "label": "ダブルヒット判定を有効にする（実験的）",
+          "description": "面の両側、または縁の両側を同時に叩いたとき、ダブルヒットとして判定し、両方のボタンを押します。"
+        }
+      },
+      "taikocatzv4": {
+        "loading": "設定を読み込んでいます...",
+        "bannerHint": {
+          "title": "注意: 開発・テスト段階です",
+          "detail1": "このツールは TaikoCatz ドングルの作者と共同で開発されていますが、まだ十分に安定していません。まずは公式の設定ツールを優先してください。",
+          "detail2": "保存すると、ドングルは 5 秒間音楽を再生した後、自動的に再起動します。再設定するにはデバイスの再接続が必要です。"
+        },
+        "sensitivity": {
+          "label": "感度",
+          "tooltip": "各ヒット領域の感度と全体感度倍率を調整します。<1></1>感度が高いほど、軽いヒットも有効な入力として認識されます。<3></3>相対感度を調整すると、領域ごとの構造やセンサー差によるクロストークを減らせます。",
+          "sides": {
+            "leftKa": "左カッ",
+            "leftDon": "左ドン",
+            "rightDon": "右ドン",
+            "rightKa": "右カッ"
+          },
+          "overall": {
+            "label": "全体感度",
+            "options": {
+              "low": "低（0.7x）",
+              "medium": "中（1.0x）",
+              "high": "高（1.4x）",
+              "veryHigh": "かなり高い（2.0x）",
+              "extreme": "極限（2.8x）"
+            }
+          }
+        },
+        "performance": {
+          "label": "性能",
+          "tooltip": "性能と信頼性のバランスを調整します。",
+          "drumrollLevel": {
+            "label": "連打性能レベル",
+            "tooltip": "連打性能と信頼性のバランスを調整します。<1></1>レベルを上げると高速連打でより多くのヒットを検出できますが、クロストークや二重ヒットのリスクも増えます。<3></3>太鼓の設計や品質には差があるため、性能と信頼性のどちらを優先するか調整が必要になる場合があります。<5></5>この設定はヒット判定に影響します。高いレベルほど境界上の振動をヒットとして拾いやすく、低いレベルほどクロストークや二重ヒットのような曖昧な信号をより保守的に除外します。",
+            "options": {
+              "fallback": "保守モード（信頼性++、連打性能--、既定 16ms）",
+              "level1": "レベル 1（信頼性+、連打性能-、既定 16ms）",
+              "level2": "レベル 2（バランス型、既定 10ms）",
+              "level3": "レベル 3（信頼性-、連打性能+、既定 8ms）",
+              "level4": "レベル 4（信頼性--、連打性能++、既定 6ms）"
+            }
+          },
+          "usePresetDrumroll": "連打レベルの既定時間を使用",
+          "keyPressDuration": {
+            "label": "キー押下時間",
+            "tooltip": "無効にすると、カスタムのキー押下時間（ミリ秒）を使用します。<1></1>キーボードモードと汎用ゲームパッドモードに適用されます。<3></3>イベント入力ではなくポーリング方式のゲームの多くは、入力を安定して認識するために長めの押下時間が必要です。短すぎると、これらのゲームでランダムにヒットを取りこぼすことがあります。<5></5>長すぎると、連打レベルが高くてもダブルストロークや連打が難しくなる場合があります。"
+          }
+        },
+        "others": {
+          "label": "その他",
+          "keyboardMapping": {
+            "label": "キーマッピング方式",
+            "options": {
+              "dfjk": "DF-JK 配列を使用",
+              "zxcv": "ZX-CV 配列を使用"
+            }
+          }
+        }
+      }
+    },
+    "test": {
+      "keyboardTestEntry": {
+        "label": "キーボード（DFJK）",
+        "frameSampleMode": {
+          "label": "フレームごとのサンプルモード"
+        }
+      },
+      "leftKaTotalCounter": {
+        "tooltip": "左カッヒットの合計回数"
+      },
+      "leftDonTotalCounter": {
+        "tooltip": "左ドンヒットの合計回数"
+      },
+      "rightDonTotalCounter": {
+        "tooltip": "右ドンヒットの合計回数"
+      },
+      "rightKaTotalCounter": {
+        "tooltip": "右カッヒットの合計回数"
+      },
+      "resetCounters": {
+        "tooltip": "カウンターをリセット"
+      },
+      "donRendaCounter": {
+        "label": "面の連打カウンター"
+      },
+      "rendaSpeed": {
+        "label": "{speed} 回/秒"
+      },
+      "kaRendaCounter": {
+        "label": "縁の連打カウンター"
+      },
+      "joystickTestEntry": {
+        "noConnectedLabel": "ジョイスティック {playerIndex} は接続されていません"
+      }
+    }
+  },
+  "common": {
+    "keyboardUsage": {
+      "keyboardAa": "A キー",
+      "keyboardBb": "B キー",
+      "keyboardCc": "C キー",
+      "keyboardDd": "D キー",
+      "keyboardEe": "E キー",
+      "keyboardFf": "F キー",
+      "keyboardGg": "G キー",
+      "keyboardHh": "H キー",
+      "keyboardIi": "I キー",
+      "keyboardJj": "J キー",
+      "keyboardKk": "K キー",
+      "keyboardLl": "L キー",
+      "keyboardMm": "M キー",
+      "keyboardNn": "N キー",
+      "keyboardOo": "O キー",
+      "keyboardPp": "P キー",
+      "keyboardQq": "Q キー",
+      "keyboardRr": "R キー",
+      "keyboardSs": "S キー",
+      "keyboardTt": "T キー",
+      "keyboardUu": "U キー",
+      "keyboardVv": "V キー",
+      "keyboardWw": "W キー",
+      "keyboardXx": "X キー",
+      "keyboardYy": "Y キー",
+      "keyboardZz": "Z キー",
+      "keyboard1Exclamation": "1 キー",
+      "keyboard2At": "2 キー",
+      "keyboard3Hash": "3 キー",
+      "keyboard4Dollar": "4 キー",
+      "keyboard5Percent": "5 キー",
+      "keyboard6Caret": "6 キー",
+      "keyboard7Ampersand": "7 キー",
+      "keyboard8Asterisk": "8 キー",
+      "keyboard9OpenParens": "9 キー",
+      "keyboard0CloseParens": "0 キー",
+      "keyboardEnter": "Enter キー",
+      "keyboardEscape": "Escape キー",
+      "keyboardBackspace": "Backspace キー",
+      "keyboardTab": "Tab キー",
+      "keyboardSpacebar": "Space キー",
+      "keyboardDashUnderscore": "マイナスキー",
+      "keyboardEqualPlus": "イコールキー",
+      "keyboardOpenBracketBrace": "左角括弧キー",
+      "keyboardCloseBracketBrace": "右角括弧キー",
+      "keyboardBackslashBar": "バックスラッシュキー",
+      "keyboardNonUSHash": "非 US 配列の # キー",
+      "keyboardSemiColon": "セミコロンキー",
+      "keyboardSingleDoubleQuote": "シングル/ダブルクォートキー",
+      "keyboardBacktickTilde": "バッククォート/チルダキー",
+      "keyboardCommaLess": "カンマキー",
+      "keyboardPeriodGreater": "ピリオドキー",
+      "keyboardSlashQuestion": "スラッシュキー",
+      "keyboardCapsLock": "Caps Lock キー",
+      "keyboardF1": "F1 キー",
+      "keyboardF2": "F2 キー",
+      "keyboardF3": "F3 キー",
+      "keyboardF4": "F4 キー",
+      "keyboardF5": "F5 キー",
+      "keyboardF6": "F6 キー",
+      "keyboardF7": "F7 キー",
+      "keyboardF8": "F8 キー",
+      "keyboardF9": "F9 キー",
+      "keyboardF10": "F10 キー",
+      "keyboardF11": "F11 キー",
+      "keyboardF12": "F12 キー",
+      "keyboardRightArrow": "右矢印キー",
+      "keyboardLeftArrow": "左矢印キー",
+      "keyboardDownArrow": "下矢印キー",
+      "keyboardUpArrow": "上矢印キー"
+    },
+    "drumSide": {
+      "leftKa": "左カッ",
+      "leftDon": "左ドン",
+      "rightDon": "右ドン",
+      "rightKa": "右カッ",
+      "customButton1": "カスタムボタン 1",
+      "customButton2": "カスタムボタン 2",
+      "customButton3": "カスタムボタン 3",
+      "customButton4": "カスタムボタン 4"
+    }
+  },
+  "dialogs": {
+    "taikoControllerSelector": {
+      "item": {
+        "dongleType": "ドングル種類：{dongleType}",
+        "serialNumber": "シリアル番号: {serialNumber}",
+        "connected": "接続済み"
+      },
+      "button": {
+        "connected": "接続済み",
+        "selectController": "太鼓コントローラーを選択",
+        "reloadConfig": "設定を再読み込み"
+      },
+      "title": "検出された太鼓コントローラー",
+      "noControllerTip": "太鼓コントローラーが見つかりません<1></1>PC とコントローラーの接続を確認してください。<3></3>さらに、コントローラーがキーボードモードに切り替わっていることも確認してください。"
+    },
+    "saveConfigError": {
+      "title": "設定の保存に失敗しました",
+      "desc": "設定の保存に失敗しました。エラー: {{message}}",
+      "close": "閉じる",
+      "unknown": "不明なエラー"
+    },
+    "webHidCheck": {
+      "title": "お使いのブラウザーは WebHID API をサポートしていません",
+      "desc": "このページを正しく動作させるには、WebHID API に対応したブラウザーが必要です。最新版の Chrome/Chromium または Microsoft Edge を使用するか、このアプリのデスクトップ版を使用してください。",
+      "refer": "詳細はこちら: ",
+      "referLink": "WebHID API の対応状況一覧",
+      "browseOnly": "閲覧のみ"
+    }
+  }
+}
